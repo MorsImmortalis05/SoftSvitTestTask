@@ -1,22 +1,63 @@
-# SoftSvitTestTask
+# 🛒 Kitka-Sonya Product Parser
 
-Тестове завдання складається з 3-х рівнів складності. Для його проходження достатньо зробити 1-й. 
+This project scrapes products from the online store **kitka-sonya.com**, collecting product data such as:
 
-1-й рівень.
-Написати скрипт-парсер, який буде збирати всі товари та їх загальну інформацію з плитки товарів (додаток 1), а саме:
-назва товару
-ціна
-рейтинг
-ціна зі знижкою (якщо є знижка)
-Зібрати інформацію необхідно з усіх товарів – включно з тими, що в пагінації.
-Зберегти інформацію в окремому файлі у форматі json.
+* Titles
+* Prices
+* Ratings
+* Descriptions
+* Image links
 
-2-й рівень.
-Додати до парсингу зображення товарів та вивантажувати їх.
+It also downloads product images locally.
 
-3-й рівень.
-Збирати деталізовану інформацію за кожним товаром на його сторінці, а саме “Додаткову інформацію”, що знаходиться в окремому табі в таблиці (додаток 2). 
+---
 
-Усі необхідні залежності проєкту мають бути в окремому файлі requirements.txt
+## 🚀 How to Run the Parser
 
-Сайт – https://kitka-sonya.com/shop/ 
+Follow these steps to run the Kitka-Sonya product parser locally.
+
+### 1. Clone the repository
+
+```bash
+git clone https://github.com/MorsImmortalis05/SoniaParser.git
+cd SoniaParser
+```
+
+### 2. Create and activate a virtual environment
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate   # macOS / Linux
+# or
+.venv\Scripts\activate      # Windows
+```
+
+### 3. Install dependencies
+
+```bash
+pip install -r requirements.txt
+```
+
+### 4. Run the parser
+
+In the project root:
+
+```bash
+python parser/main.py
+```
+
+This will:
+
+* Fetch all product links
+* Parse each product
+* Download product images into `/sonia_images/`
+* Save structured data into `sonia_products.json`
+
+### 5. Output files
+
+After running the script, you will see:
+
+```
+sonia_products.json   → parsed product data
+sonia_images/         → downloaded product images
+```

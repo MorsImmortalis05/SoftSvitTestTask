@@ -1,19 +1,8 @@
-import json
-import time
-from concurrent.futures import ThreadPoolExecutor, as_completed
-from dataclasses import dataclass
-from selenium import webdriver
-from selenium.common import NoSuchElementException
-from selenium.webdriver.common.by import By
-from selenium.webdriver.support.ui import WebDriverWait
-from selenium.webdriver.support import expected_conditions as EC
-
 import requests
 from bs4 import BeautifulSoup
 from dataclasses import dataclass
 
-from parser.services import clean_price, get_description_dict, \
-    parse_description
+from parser.services import clean_price, parse_description, download_image
 
 BASE_URL = "https://kitka-sonya.com/shop/"
 
@@ -21,11 +10,12 @@ BASE_URL = "https://kitka-sonya.com/shop/"
 @dataclass
 class Product:
     title: str
-    current_price: str
-    old_price: str
-    rating: str
+    current_price: int
+    old_price: int
+    rating: float
     image_link: str
     description: dict
+    image_path: str
 
 
 def get_soup(url: str) -> BeautifulSoup | None:
@@ -47,22 +37,23 @@ def parse_product(link: str) -> Product:
     if price_block:
         current_price_el = price_block.select_one("span.woocommerce-Price-amount")
         old_price_el = price_block.select_one("del .woocommerce-Price-amount")
-        current_price = clean_price(current_price_el.text if current_price_el else "")
-        old_price = clean_price(old_price_el.text if old_price_el else "")
+        current_price = int(clean_price(current_price_el.text.strip())) if current_price_el else None
+        old_price = int(clean_price(old_price_el.text.strip())) if old_price_el else None
     else:
-        current_price = old_price = ""
+        current_price = old_price = None
 
     rating_el = soup.select_one(".star-rating")
     if rating_el and rating_el.get("aria-label"):
         try:
-            rating = rating_el["aria-label"].split()[1]
+            rating = float(rating_el["aria-label"].split()[1])
         except (KeyError, IndexError):
-            rating = ""
+            rating = None
     else:
-        rating = ""
+        rating = None
 
     image_el = soup.select_one(".woocommerce-product-gallery__image img, .wp-post-image")
     image_link = image_el["src"] if image_el else ""
+    image_path = download_image(image_link) if image_link else ""
 
     description = parse_description(soup)
 
@@ -72,7 +63,8 @@ def parse_product(link: str) -> Product:
         old_price=old_price,
         rating=rating,
         image_link=image_link,
-        description=description
+        description=description,
+        image_path=image_path,
     )
 
 def get_all_product_links() -> list:

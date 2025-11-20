@@ -1,5 +1,4 @@
 from bs4 import BeautifulSoup
-from selenium.webdriver.common.by import By
 
 
 def clean_price(price: str) -> str:
@@ -17,18 +16,25 @@ def parse_description(soup: BeautifulSoup) -> dict:
         key = row.select_one("th")
         val = row.select_one("td")
         if key and val:
-            result[key.text] = val.text
+            result[key.text.strip()] = val.text.strip()
 
     return result
 
-def get_description_dict(driver):
-    description_dict = {}
-    table = driver.find_element(By.CSS_SELECTOR, "#tab-additional_information table")
-    rows = table.find_elements(By.CSS_SELECTOR, "tr")
 
-    for row in rows:
-        label = row.find_element(By.CSS_SELECTOR, "th").text.strip()
-        value = row.find_element(By.CSS_SELECTOR, "td").text.strip()
-        description_dict[label] = value
+import requests
+import os
 
-    return description_dict
+
+def download_image(url: str, folder: str = "sonia_images"):
+    os.makedirs(folder, exist_ok=True)
+    filename = url.split("/")[-1].split("?")[0]
+    path = os.path.join(folder, filename)
+
+    response = requests.get(url)
+    response.raise_for_status()
+
+    with open(path, "wb") as f:
+        f.write(response.content)
+
+    return path
+

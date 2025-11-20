@@ -7,10 +7,8 @@ BASE_URL = "https://kitka-sonya.com/shop/"
 
 def main():
     links = get_all_product_links()
-    products = []
 
-    for link in links:
-        products.append(parse_product(link))
+    products = [parse_product(link) for link in links]
 
     with open("sonia_products.json", "w", encoding="utf-8") as f:
         json.dump([p.__dict__ for p in products], f, ensure_ascii=False, indent=4)
